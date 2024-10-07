@@ -1,0 +1,114 @@
+.toast {
+    z-index: 9999 !important;  /* Ensure Toastr has higher stacking */
+}
+
+.dark-font {
+    color: #000000;
+}
+.small-swal-popup {
+    width: 300px;
+    padding: 15px;
+}
+.small-swal-title {
+    font-size: 16px;
+}
+.small-swal-text {
+    font-size: 13px;
+}
+.small-swal-button {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+.small-swal-icon {
+    font-size: 10px;
+}
+
+/* password toggle */
+.password-toggle {
+    cursor: pointer;
+}
+
+
+
+/* Toggle */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 55px;  /* Decreased from 60px to 55px */
+    height: 29px; /* Decreased from 34px to 29px */
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px; /* Keep this the same to maintain the rounded corners */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 21px; /* Decreased from 26px to 21px */
+    width: 21px;  /* Decreased from 26px to 21px */
+    left: 4px;
+    bottom: 4px;  /* Adjust if needed to center the smaller circle */
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #ffae1f;
+}
+
+input:checked + .slider:before {
+    transform: translateX(25px); /* Adjusted from 26px to 25px to accommodate the smaller width */
+}
+
+
+
+
+/* rintone progress bar */
+.progress-bar {
+    stroke-dasharray: 0 100;
+    transition: stroke-dasharray 0.3s linear;
+}
+
+
+.dark-mode {
+    background-color: #000000;
+    color: #ffffff;
+  }
+  
+  .dark-mode .navbar {
+    background-color: #000000;
+  }
+  
+  .dark-mode .card {
+    background-color: #131313;
+    color: #ffffff;
+  }
+
+.dark-mode .app-header{
+    background-color: #000000;
+    color: #ffffff;
+}  
+
+.dark-mode .left-sidebar{
+    background-color: #000000;
+    color: #ffffff;
+}
+.text-danger {
+    color: #ff4942 !important;
+}

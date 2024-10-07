@@ -1,0 +1,98 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}
+<title>Edit User | Admin Panel</title>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div class="mb-3 mb-sm-0">
+                            <h5 class="card-title fw-semibold">Edit User</h5>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- User Name -->
+                        <div class="mb-3">
+                            <label for="user_name" class="form-label">User Name</label>
+                            <input type="text" class="form-control" id="user_name" name="user_name"
+                                   placeholder="Enter User Name" value="{{ admin.user_name }}" required readonly>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   placeholder="Enter Email" value="{{ admin.email }}" required readonly>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="mb-3">
+                            <label for="user_phone" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="user_phone" name="user_phone"
+                                   placeholder="Enter Phone Number" value="{{ admin.user_phone }}">
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="mb-3">
+                            <label for="user_gender" class="form-label">Gender</label>
+                            <select class="form-control" id="user_gender" name="user_gender">
+                                <option disabled selected>Choose Gender</option>
+                                <option value="M" {% if admin.user_gender == 'M' %}selected{% endif %}>Male</option>
+                                <option value="F" {% if admin.user_gender == 'F' %}selected{% endif %}>Female</option>
+                                <option value="O" {% if admin.user_gender == 'O' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option disabled >Choose status</option>
+                                <option value="1" {% if admin.status == 1 %}selected{% endif %}>Active</option>
+                                <option value="0" {% if admin.status == 0 %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+
+                        <!-- Profile Image with Preview -->
+                        <div class="mb-3">
+                            <label for="profile_img" class="form-label">Profile Image</label>
+                            <div class="mb-3">
+                                {% if admin.profile_img %}
+                                    <img id="profile-img-preview" src="{{ admin.profile_img.url }}" alt="Image Preview"
+                                         style="display:block; max-width: 150px; max-height: 150px; margin-top: 10px;" />
+                                {% else %}
+                                    <img id="profile-img-preview" src="#" alt="Image Preview"
+                                         style="display:none; max-width: 150px; max-height: 150px; margin-top: 10px;" />
+                                {% endif %}
+                            </div>
+                            <input type="file" class="form-control" id="profile_img" name="profile_img" onchange="previewImage(event)">
+                        </div>
+
+                        <!-- Password (Optional) -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="Leave blank to keep current password">
+                        </div>
+
+                        <!-- Submit & Cancel Buttons -->
+                        <button type="submit" class="btn btn-warning">Update</button>
+                        <a href="{% url 'admins_list' %}" class="btn bg-secondary-subtle text-secondary ms-6">Cancel</a>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

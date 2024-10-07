@@ -1,0 +1,296 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}
+<title>Edit Ringtone | Ringtone Shuffle!</title>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div class="mb-3 mb-sm-0">
+                            <h5 class="card-title fw-semibold">Edit Ringtone</h5>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Checkbox for All India -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_all_india" name="is_all_india" {% if ringtone.is_all %}checked{% endif %} onchange="toggleStateCityFields()" required>
+                            <label class="form-check-label" for="is_all_india">All India</label>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3" data-url="{% url 'get_cities_by_state' %}">
+                                <label for="state" class="form-label">State</label>
+                                <select class="form-control" id="state" name="state" onchange="toggleAllIndiaCheckbox()" required>
+                                    <option  selected value="">Select State</option>
+                                    {% for state in states %}
+                                        <option value="{{ state.id }}" {% if state.id == ringtone.state.id %}selected{% endif %}>{{ state.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <select class="form-control" id="city" name="city" onchange="toggleAllIndiaCheckbox()" required>
+                                    <option selected value="">Select City</option>
+                                    {% for city in cities %}
+                                        <option value="{{ city.id }}" {% if city.id == ringtone.city.id %}selected{% endif %}>{{ city.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ringtone_year" class="form-label">Ringtone Year From</label>
+                                <input type="text" class="form-control" id="ringtone_year" name="ringtone_year_from" value="{{ ringtone.ringtone_year_start }}" placeholder="Enter Ringtone From Year" pattern="\d{4}" maxlength="4" required readonly>
+                                <div class="invalid-feedback">
+                                    Please enter a valid 4-digit year between 1800 and {{ current_year }}.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="ringtone_year" class="form-label">Ringtone Year To</label>
+                                <input type="text" class="form-control" id="ringtone_year" name="ringtone_year_to" value="{{ ringtone.ringtone_year_end }}" placeholder="Enter Ringtone To Year" pattern="\d{4}" maxlength="4" required readonly>
+                                <div class="invalid-feedback">
+                                    Please enter a valid 4-digit year between 1800 and {{ current_year }}.
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="language_name" class="form-label">Ringtone Language</label>
+                                <select class="form-control" id="language_name" name="language_name" required>
+                                    <option disabled value="">Select Ringtone Language</option>
+                                    {% for language in ringtone_languages %}
+                                        <option value="{{ language.id }}" {% if language.id == ringtone.ringtone_language.id %}selected{% endif %}>{{ language.language_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ringtone_title" class="form-label">Ringtone Title</label>
+                                <input type="text" class="form-control" id="ringtone_title" name="ringtone_title" value="{{ ringtone.ringtone_title }}" required>
+                            </div>
+
+                        </div>
+                        
+                        <div class="row">
+                            <!-- <div class="col-md-6 mb-3">
+                                <label for="audio_type" class="form-label">Audio Type</label>
+                                <select class="form-control" id="audio_type" name="audio_type" onchange="toggleAudioFields()" required>
+                                    <option value="file" {% if ringtone.audio_type == 'file' %}selected{% endif %}>Browse from Device</option>
+                                </select>
+                            </div> -->
+                            <div class="col-md-12 mb-3" id="file_field" {% if ringtone.audio_type == 'url' %}style="display: none;"{% endif %}>
+                                <label for="ringtone_file" class="form-label">Ringtone File</label>
+                                <input type="file" class="form-control" id="ringtone_file" name="ringtone_file" accept="audio/*">
+                                {% if ringtone.ringtone_file %}
+                                    <audio id="audio_preview_existing" controls style="margin-top: 10px;">
+                                        <source src="{{ ringtone.ringtone_file.url }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                {% endif %}
+                                <audio id="audio_preview_new" controls style="margin-top: 10px; display: none;"></audio>
+                            </div>
+                        </div>
+
+                        <!-- Checkbox for Mark as Hyped -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_hyped" name="is_hyped" {% if ringtone.is_hyped %}checked{% endif %} onchange="togglePlayTimes()">
+                            <label class="form-check-label" for="is_hyped">Mark as Hyped</label>
+                        </div>
+
+                        <!-- Play Times field (hidden until checkbox is checked) -->
+                        <div class="mb-3" id="play_times_field" {% if not ringtone.is_hyped %}style="display: none;"{% endif %}>
+                            <label for="play_times" class="form-label">Play Times</label>
+                            <input type="number" class="form-control" id="play_times" name="play_times" value="{{ ringtone.play_times }}" min="1" required>
+                        </div>
+
+                        <!-- Submit and Cancel buttons -->
+                        <button type="submit" class="btn btn-warning">Update</button>
+                        <a href="{% url 'ringtones_list' %}" class="btn bg-secondary-subtle text-secondary ms-6">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to preview the newly selected audio file
+    const ringtoneFileInput = document.getElementById('ringtone_file');
+    const audioPreviewNew = document.getElementById('audio_preview_new');
+    const audioPreviewExisting = document.getElementById('audio_preview_existing');
+
+    ringtoneFileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const fileURL = URL.createObjectURL(file);
+            audioPreviewNew.src = fileURL;
+            audioPreviewNew.style.display = 'block'; // Show the audio player for new file
+            if (audioPreviewExisting) {
+                audioPreviewExisting.style.display = 'none'; // Hide the existing audio player
+            }
+        } else {
+            audioPreviewNew.src = '';
+            audioPreviewNew.style.display = 'none'; // Hide the new audio player if no file is selected
+            if (audioPreviewExisting) {
+                audioPreviewExisting.style.display = 'block'; // Show the existing audio player if no new file is selected
+            }
+        }
+    });
+
+    const yearInput = document.getElementById('ringtone_year');
+    const currentYear = new Date().getFullYear();
+
+    yearInput.addEventListener('input', function(event) {
+        this.value = this.value.replace(/[^0-9]/g, '').substring(0, 4);
+        if (this.value.length === 4) {
+            const year = parseInt(this.value, 10);
+            if (year < 1800 || year > currentYear) {
+                this.setCustomValidity("Please enter a valid year between 1800 and " + currentYear);
+            } else {
+                this.setCustomValidity("");
+            }
+        } else {
+            this.setCustomValidity("");
+        }
+    });
+
+    window.onload = function() {
+        toggleAudioFields();
+        toggleStateCityFields();
+        toggleAllIndiaCheckbox();
+    };
+
+    window.onload = function() {
+    initializeStateCityFields();
+    togglePlayTimes(); // Ensure hyped checkbox works correctly on load
+};
+
+    // Toggle file and URL fields based on audio type selection
+    function toggleAudioFields() {
+        var audioType = document.getElementById('audio_type').value;
+        var fileField = document.getElementById('file_field');
+        var urlField = document.getElementById('url_field');
+        var ringtoneUrl = document.getElementById('ringtone_url');
+        var ringtoneFile = document.getElementById('ringtone_file');
+
+        if (audioType === 'file') {
+            fileField.style.display = 'block';
+            urlField.style.display = 'none';
+            ringtoneUrl.removeAttribute('required');
+            ringtoneFile.setAttribute('required', 'required');
+        } else {
+            fileField.style.display = 'none';
+            urlField.style.display = 'block';
+            ringtoneUrl.setAttribute('required', 'required');
+            ringtoneFile.removeAttribute('required');
+        }
+    }
+
+    function togglePlayTimes() {
+    const isHyped = document.getElementById('is_hyped').checked;
+    const playTimesField = document.getElementById('play_times_field');
+    const playTimesInput = document.getElementById('play_times');
+
+    if (isHyped) {
+        playTimesField.style.display = 'block';
+        playTimesInput.setAttribute('required', 'required'); // Add required when field is shown
+    } else {
+        playTimesField.style.display = 'none';
+        playTimesInput.removeAttribute('required'); // Remove required when field is hidden
+    }
+}
+
+    // Toggle the state and city dropdowns based on the All India checkbox
+    function toggleStateCityFields() {
+        const isAllIndiaChecked = document.getElementById('is_all_india').checked;
+        const stateField = document.getElementById('state');
+        const cityField = document.getElementById('city');
+
+        if (isAllIndiaChecked) {
+            stateField.setAttribute('disabled', 'disabled');
+            cityField.setAttribute('disabled', 'disabled');
+        } else {
+            stateField.removeAttribute('disabled');
+            cityField.removeAttribute('disabled');
+        }
+    }
+
+    // Disable the All India checkbox if state or city is selected
+    function toggleAllIndiaCheckbox() {
+        const stateValue = document.getElementById('state').value;
+        const cityValue = document.getElementById('city').value;
+        const allIndiaCheckbox = document.getElementById('is_all_india');
+
+        if (stateValue || cityValue) {
+            allIndiaCheckbox.setAttribute('disabled', 'disabled');
+        } else {
+            allIndiaCheckbox.removeAttribute('disabled');
+        }
+    }
+
+
+
+
+    window.onload = function() {
+    initializeStateCityFields();
+    togglePlayTimes(); // Ensure hyped checkbox works correctly on load
+};
+
+// Initialize the state and city dropdowns based on the is_all_india checkbox value from the database
+function initializeStateCityFields() {
+    const isAllIndiaChecked = document.getElementById('is_all_india').checked;
+    const stateField = document.getElementById('state');
+    const cityField = document.getElementById('city');
+
+    if (isAllIndiaChecked) {
+        stateField.setAttribute('disabled', 'disabled');
+        cityField.setAttribute('disabled', 'disabled');
+    } else {
+        stateField.removeAttribute('disabled');
+        cityField.removeAttribute('disabled');
+    }
+}
+
+// Toggle the state and city dropdowns based on the All India checkbox
+function toggleStateCityFields() {
+    const isAllIndiaChecked = document.getElementById('is_all_india').checked;
+    const stateField = document.getElementById('state');
+    const cityField = document.getElementById('city');
+
+    if (isAllIndiaChecked) {
+        stateField.setAttribute('disabled', 'disabled');
+        cityField.setAttribute('disabled', 'disabled');
+    } else {
+        stateField.removeAttribute('disabled');
+        cityField.removeAttribute('disabled');
+    }
+}
+
+// Disable the All India checkbox if state or city is selected
+function toggleAllIndiaCheckbox() {
+    const stateValue = document.getElementById('state').value;
+    const cityValue = document.getElementById('city').value;
+    const allIndiaCheckbox = document.getElementById('is_all_india');
+
+    if (stateValue || cityValue) {
+        allIndiaCheckbox.setAttribute('disabled', 'disabled');
+    } else {
+        allIndiaCheckbox.removeAttribute('disabled');
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}
+<title>Create User | User Management</title>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div class="mb-3 mb-sm-0">
+                            <h5 class="card-title fw-semibold">Create New User</h5>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data" action="" id="userForm" onsubmit="return validateForm()">
+                        {% csrf_token %}
+
+                        <!-- Email field -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter Gmail address" required>
+                            <div class="invalid-feedback" id="emailError"></div>
+                        </div>
+
+                        <!-- User Name field -->
+                        <div class="mb-3">
+                            <label for="user_name" class="form-label">User Name</label>
+                            <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter user name" required>
+                            <div class="invalid-feedback" id="nameError"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="user_phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="user_phone" name="user_phone" placeholder="Enter phone number" required maxlength="10" onkeypress="return onlyDigits(event)">
+                            <div class="invalid-feedback" id="phoneError"></div>
+                        </div>
+
+                        <!-- Date of Birth field -->
+                        <div class="mb-3">
+                            <label for="user_dob" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="user_dob" name="user_dob" required>
+                            <div class="invalid-feedback" id="dobError"></div>
+                        </div>
+
+                        <!-- Gender field -->
+                        <div class="mb-3">
+                            <label for="user_gender" class="form-label">Gender</label>
+                            <select class="form-control" id="user_gender" name="user_gender" required>
+                                <option selected disabled value="">Select Gender</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                                <option value="O">Other</option>
+                            </select>
+                            <div class="invalid-feedback" id="genderError"></div>
+                        </div>
+
+                        <!-- Password field with toggle -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required minlength="8" oninput="validatePassword(this)">
+                                <span class="input-group-text" id="toggle-password">
+                                    <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="invalid-feedback" id="passwordError"></div>
+                        </div>
+
+                        <!-- Profile Image field -->
+                        <div class="mb-3">
+                            <label for="profile_img" class="form-label">Profile Image</label>
+                            <div class="mb-3">
+                                <img id="logo-preview" src="#" alt="Image Preview" style="display:none; max-width: 150px; max-height: 150px; margin-top: 10px;" />
+                            </div>
+                            <input type="file" class="form-control" id="logo" name="profile_img" accept="image/*" onchange="previewImage(event)">
+                            <div class="invalid-feedback" id="imageError"></div>
+                        </div>
+
+                        <!-- Submit and Cancel buttons -->
+                        <button type="submit" class="btn btn-warning">Submit</button>
+                        <a href="{% url 'users_list' %}" class="btn bg-secondary-subtle text-secondary ms-6">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+        // Function to preview the image and validate file type
+    function previewImage(event) {
+        const file = event.target.files[0]; // Get the selected file
+        const imageError = document.getElementById("imageError");
+        const logoPreview = document.getElementById("logo-preview");
+
+        imageError.innerText = ""; // Reset error message
+        logoPreview.style.display = "none"; // Hide image preview initially
+
+        if (file) {
+            // Check if the file is an image
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+            if (!validImageTypes.includes(file.type)) {
+                imageError.innerText = "Please upload a valid image (JPEG, PNG, GIF, JPG).";
+                event.target.value = ""; // Reset the file input
+                return; // Exit the function if the file is not a valid image
+            }
+
+            // If valid, show the image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file); // Read the selected file
+        }
+    }
+
+// Function to restrict input to digits only
+function onlyDigits(event) {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+        event.preventDefault();
+        return false;
+    }
+    return true;
+}
+
+// Function to validate the form
+function validateForm() {
+    let valid = true;
+    const email = document.getElementById("email").value;
+    const userName = document.getElementById("user_name").value;
+    const phone = document.getElementById("user_phone").value;
+    const password = document.getElementById("password").value;
+
+    // Reset error messages
+    document.getElementById("emailError").innerText = "";
+    document.getElementById("nameError").innerText = "";
+    document.getElementById("phoneError").innerText = "";
+    document.getElementById("passwordError").innerText = "";
+
+    // Email validation (Gmail only and must end with .com)
+    const emailPattern = /^[^\s@]+@gmail\.com$/;
+    if (!emailPattern.test(email)) {
+        document.getElementById("emailError").innerText = "Please enter a valid Gmail address";
+        valid = false;
+    }
+
+    // Username validation (ensure it's not empty)
+    if (userName.trim() === "") {
+        document.getElementById("nameError").innerText = "Please enter a valid user name";
+        valid = false;
+    }
+
+    // Phone validation (greater than 9 and less than 11 digits)
+    if (phone.length < 9 && phone.length >11) {
+        document.getElementById("phoneError").innerText = "Phone number must be exactly 10 digits";
+        valid = false;
+    }
+
+    // Password validation
+    const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!passwordPattern.test(password)) {
+        document.getElementById("passwordError").innerText = "Password must contain at least one uppercase letter, one number, one special character, and be at least 8 characters long.";
+        valid = false;
+    }
+
+    return valid;
+}
+
+document.getElementById('toggle-password').addEventListener('click', function () {
+    const passwordField = document.getElementById('password');
+    const icon = this.querySelector('i'); // Find the <i> element inside the span
+    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordField.setAttribute('type', type);
+
+    // Toggle the icon class
+    icon.classList.toggle('fa-eye');
+    icon.classList.toggle('fa-eye-slash');
+});
+
+
+// Validate password complexity
+function validatePassword(input) {
+    const value = input.value;
+    const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!passwordPattern.test(value)) {
+        input.setCustomValidity("Password must contain 1 uppercase letter, 1 number, 1 special character, and be 8 characters long.");
+    } else {
+        input.setCustomValidity(""); // Reset custom validity
+    }
+}
+</script>
+{% endblock %}

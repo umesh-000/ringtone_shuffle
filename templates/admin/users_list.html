@@ -1,0 +1,116 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}
+<title>Users | Ringtone Shuffle!</title>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Row 1 -->
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <div class="mb-3 mb-sm-0">
+              <h5 class="card-title fw-semibold">Users</h5>
+            </div>
+            <div class="text-center mx-auto">
+              <h6 class="fw-semibold">Total Users: ({{ total_users }})</h6>
+            </div>
+
+            <a href="{% url 'users_create' %}">
+                <button type="button" class="btn btn-warning m-1">
+                  <i class="ti ti-plus text-white"></i> New User
+                </button>
+              </a>
+          </div>
+          
+          <!-- Dynamic users rendering in table format -->
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>DOB</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td>{{ user.user_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.user_dob }}</td>
+                <td>{{ user.user_phone }}</td>
+                <td>
+                  <!-- Display status as Active/Inactive -->
+                  <span class="badge {% if user.status == 1 %}bg-success{% else %}bg-danger{% endif %} fw-bold">
+                    {% if user.status == 1 %}Active{% else %}Inactive{% endif %}
+                  </span>
+                </td>
+                <td>
+                  <!-- User Actions -->
+                  <a href="{% url 'users_edit' user.id %}" class="me-2" title="Edit">
+                    <i class="ti ti-edit text-info fs-8"></i>
+                  </a>
+                  <a href="javascript:void(0);" onclick="userconfirmDelete({{ user.id }})" title="Delete">
+                    <i class="ti ti-trash text-danger fs-8"></i>
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">No users available.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+                {% if users.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                {% endif %}
+        
+                {% for i in users.paginator.page_range %}
+                    {% if users.number == i %}
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="#">{{ i }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+        
+                {% if users.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ users.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}
+<title>Dashboard - Ringtone Shuffle!</title>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- Row 1: Dashboard Widgets -->
+    <div class="row">
+        <!-- Card: Ringtones -->
+        <div class="col-xxl-4 col-md-6">
+            <div class="card card-raised border-start border-info border-5">
+                <div class="card-body px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-2">
+                            <div class="display-4 fw-bold fs-8"><strong>{{ total_ringtones }}</strong></div>
+                            <!-- Bold Total Ringtones -->
+                            <div class="d-block mb-1 text-muted">Ringtone</div>
+                            <!-- Bold "Ringtone" Text -->
+                        </div>
+                        <div class="d-inline-flex text-info nsofts-icon">
+                            <i class="ti ti-music fs-8"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Card: Categories -->
+        <div class="col-xxl-4 col-md-6">
+            <div class="card card-raised border-start border-warning border-5">
+                <div class="card-body px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-2">
+                            <div class="display-4 fw-bold  fs-8"><strong>{{ total_Ringtone_Language }}</strong></div>
+                            <!-- Bold Total Categories -->
+                            <div class="d-block mb-1 text-muted">Ringtone Languages</div>
+                            <!-- Bold "Categories" Text -->
+                        </div>
+                        <div class="d-inline-flex text-warning nsofts-icon">
+                            <i class="ti ti-folders fs-8"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Users -->
+        <div class="col-xxl-4 col-md-6">
+            <div class="card card-raised border-start border-warning border-5">
+                <div class="card-body px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-2">
+                            <div class="display-4 fw-bold  fs-8"><strong>{{ user_count }}</strong></div>
+                            <!-- Bold Total Categories -->
+                            <div class="d-block mb-1 text-muted">Users</div>
+                            <!-- Bold "Categories" Text -->
+                        </div>
+                        <div class="d-inline-flex text-warning nsofts-icon">
+                            <i class="ti ti-users fs-8"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Card: Admin -->
+        <div class="col-xxl-4 col-md-6">
+            <div class="card card-raised border-start border-info border-5">
+                <div class="card-body px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-2">
+                            <div class="display-4 fw-bold  fs-8"><strong>{{ admin_count }}</strong></div>
+                            <!-- Bold Total Categories -->
+                            <div class="d-block mb-1 text-muted">Admin</div>
+                            <!-- Bold "Categories" Text -->
+                        </div>
+                        <div class="d-inline-flex text-info nsofts-icon">
+                            <i class="ti ti-shield fs-8"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-2">
+                            <h5 class="mb-4">Users Analytics</h5>
+                        </div>
+                        <div class="d-inline-flex">
+                            <form method="get" id="graphFilter">
+                                <select class="form-control" name="filterByYear" style="width: 120px;">
+                                    <option value="2024">2024</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                    <div style="height: 300px">
+                        <canvas id="myLineChart"></canvas> <!-- Updated to use canvas for the chart -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">New users</h5>
+                        <div class="dropdown">
+                            <a href="javascript:void(0);" class="text-decoration-none text-dark" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-more-2-fill"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-sm">
+                                <li><a class="dropdown-item" href="#">Create</a></li>
+                                <li><a class="dropdown-item" href="#">Manage</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if users.count == 0 %}
+                    <p class="text-center mt-3">No users found</p>
+                    {% else %}
+                    {% for user in users %}
+                    <div class="d-flex align-items-center mt-4">
+                        <div class="flex-grow-1 px-3">
+                            <span class="d-block text-muted"></span>
+                            <span class="d-block fw-semibold">{{ user.user_name }}</span>
+                        </div>
+                        <span>{{ user.created_at|timesince|truncatechars:15 }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Script to generate the line chart -->
+<script>
+    // user registration data according monthly     
+    const ctx = document.getElementById('myLineChart').getContext('2d');
+    const myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Users',
+                data: [1, 1, 1, 1, 1, 1, 1, 100, 250, 1, 1, 1], // Dummy data for each month
+                borderColor: 'rgba(255, 174, 31, 0.7)', // Border color of the line
+                backgroundColor: 'rgba(255, 174, 31, 0.1)', // Background color under the line
+                fill: true,
+                tension: 0.3 // Smoothness of the line
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false, // Hide the legend
+                },
+                tooltip: {
+                    enabled: false // Disable tooltips
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0, // Minimum value on y-axis
+                    max: 500, // Maximum value on y-axis
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)', // Grid line color with opacity
+                        lineWidth: 1 // Line width of the grid
+                    }
+                },
+                x: {
+                    ticks: {
+                        display: true // Show x-axis ticks (month labels)
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)', // Grid line color with opacity
+                        lineWidth: 1 // Line width of the grid
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

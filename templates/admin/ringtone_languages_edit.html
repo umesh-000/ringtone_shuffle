@@ -1,0 +1,45 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}
+<title>Edit Language | Ringtone Shuffle!</title>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body">
+                    <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div class="mb-3 mb-sm-0">
+                            <h5 class="card-title fw-semibold">Edit Language </h5>
+                        </div>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="category_name" class="form-label">Language Name</label>
+                            <input type="text" class="form-control" id="category_name" name="language_name"
+                                   placeholder="Enter Category Name" value="{{ ringtone_language.language_name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option disabled>Choose Status</option>
+                                <option value="1" {% if ringtone_language.status == 1 %}selected{% endif %}>Active</option>
+                                <option value="0" {% if ringtone_language.status == 0 %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning">Update</button>
+                        <a href="{% url 'ringtone_lan_list' %}" class="btn bg-secondary-subtle text-secondary ms-6">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

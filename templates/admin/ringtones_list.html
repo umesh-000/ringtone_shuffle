@@ -1,0 +1,128 @@
+{% extends 'admin/dashboard.html' %}
+{% load static %}
+
+{% block title %}
+<title>Ringtones - Ringtone Shuffle!</title>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
+            <div class="mb-3 mb-sm-0">
+                <h5 class="card-title fw-semibold">Ringtones</h5>
+            </div>
+            <div class="text-center mx-auto"> <!-- Centering the record count -->
+                <h6 class="fw-semibold">Total Ringtones: ({{ total_records }})</h6>
+            </div>
+            <a href="{% url 'ringtones_create' %}">
+                <button type="button" class="btn btn-warning m-1">
+                    <i class="ti ti-plus text-white"></i> New Ringtone
+                </button>
+            </a>
+          </div>
+
+          <!-- Ringtone Table -->
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th class="text-center">Ringtone</th>
+                <th>Name</th>
+                <th>Language</th>
+                <th>Year range</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ringtone in ringtones %}
+              <tr>
+                <td class="text-center pt-1 pb-1">
+                  <div class="mediPlayer">
+                      <audio class="listen" preload="none" src="{{ ringtone.ringtone_file.url }}" id="audio{{ ringtone.id }}"></audio>
+                      <svg viewBox="0 0 100 100" id="playable{{ ringtone.id }}" version="1.1" xmlns="http://www.w3.org/2000/svg" width="50" height="50" class="not-started playable" onclick="togglePlayback('{{ ringtone.id }}')">
+                          <g class="shape">
+                              <circle class="progress-track" cx="50" cy="50" r="47.45" stroke="#FFAE1F" stroke-opacity="0.25" stroke-linecap="round" fill="none" stroke-width="5"></circle>
+                              <circle class="progress-bar" cx="50" cy="50" r="47.45" stroke="#FFAE1F" stroke-opacity="1" stroke-linecap="round" fill="none" stroke-width="5" transform="rotate(-90 50 50)"></circle>
+                          </g>
+                          
+                          <g class="control pause" style="display: none;">
+                              <line x1="40" y1="35" x2="40" y2="65" stroke="#FFAE1F" fill="none" stroke-width="8" stroke-linecap="round"></line>
+                              <line x1="60" y1="35" x2="60" y2="65" stroke="#FFAE1F" fill="none" stroke-width="8" stroke-linecap="round"></line>
+                          </g>
+                          <g class="control play">
+                              <polygon points="45,35 65,50 45,65" fill="#FFAE1F" stroke-width="0"></polygon>
+                          </g>
+                      </svg>
+                  </div>
+              </td>
+                <td>{{ ringtone.ringtone_title }}</td>
+                <td>{{ ringtone.ringtone_language }}</td>
+                <td>{{ ringtone.ringtone_year_start }} - {{ ringtone.ringtone_year_end }}</td>
+                <td>
+                  <label class="switch">
+                    <input type="checkbox" onchange="RingtoneToggleStatus({{ ringtone.id }})" {% if ringtone.status %} checked {% endif %}>
+                    <span class="slider round"></span>
+                  </label>
+                </td>
+                <td>
+                  <a href="{% url 'ringtones_edit' ringtone.id %}" class="me-2" title="Edit"> <i class="ti ti-edit text-info fs-8"></i> </a>
+                  <a href="javascript:void(0);" onclick="confirm_rington_Delete({{ ringtone.id }})" title="Delete"> <i class="ti ti-trash text-danger fs-8"></i> </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6">No ringtones available.</td>
+              </tr>
+              {% endfor %}
+              
+            </tbody>
+          </table>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+                {% if ringtones.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ ringtones.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                {% endif %}
+        
+                {% for i in ringtones.paginator.page_range %}
+                    {% if ringtones.number == i %}
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="#">{{ i }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+        
+                {% if ringtones.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ ringtones.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
