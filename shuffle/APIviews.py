@@ -18,7 +18,6 @@ User = get_user_model()
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
-
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -53,7 +52,6 @@ class GenerateOTPView(APIView):
         }, status=200)
     
     
-
 class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -92,9 +90,10 @@ class LoginView(APIView):
 class GetRingtoneLanguages(APIView):
     def get(self, request):
         languages = models.Ringtone_Language.objects.filter(status=1)
-        serializer = RingtoneLanguageSerializer(languages, many=True)
+        serializer = RingtoneLanguageSerializer(languages, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+
 class GetStatesView(APIView):
     def get(self, request):
         states = models.State.objects.all().order_by('name')  # Fetch all states, ordered by name
@@ -113,8 +112,6 @@ class GetCitiesView(APIView):
         serializer = CitySerializer(cities, many=True)
         return Response({'cities': serializer.data}, status=status.HTTP_200_OK)
     
-
-
 class RingtoneView(APIView):
     def post(self, request):
         try:
@@ -135,7 +132,7 @@ class RingtoneView(APIView):
             if ringtone_language:
                 ringtone_queryset = ringtone_queryset.filter(ringtone_language=ringtone_language)
             if user_dob_year:
-                ringtone_queryset = ringtone_queryset.filter(ringtone_year=user_dob_year)
+                ringtone_queryset = ringtone_queryset.filter(ringtone_year_start__lte=user_dob_year, ringtone_year_end__gte=user_dob_year)
             if is_hyped:
                 ringtone_queryset = ringtone_queryset.filter(is_hyped=True)
             if not is_all:
@@ -145,7 +142,11 @@ class RingtoneView(APIView):
                     ringtone_queryset = ringtone_queryset.filter(city=city)
             paginator = Paginator(ringtone_queryset, page_limit)
             ringtones = paginator.get_page(page)
-            serializer = RingtoneSerializer(ringtones, many=True)
-            return Response({ 'ringtones': serializer.data, 'total_pages': paginator.num_pages, 'current_page': ringtones.number }, status=status.HTTP_200_OK)
+            serializer = RingtoneSerializer(ringtones, many=True, context={'request': request})
+            return Response({
+                'ringtones': serializer.data,
+                'total_pages': paginator.num_pages,
+                'current_page': ringtones.number
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

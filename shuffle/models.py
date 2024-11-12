@@ -38,6 +38,7 @@ class Ringtone_Language(models.Model):
         (0, 'Inactive'),
     ]
     language_name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='ringtone_language_images/', null=True, blank=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -143,7 +144,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     user_dob = models.DateField(null=True, blank=True)
     is_all = models.BooleanField(default=False,null=True,blank=True)
     profile_img = models.ImageField(upload_to='users_images/', null=True, blank=True)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
     last_activity = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -162,7 +163,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.user_name
-
 
 
 

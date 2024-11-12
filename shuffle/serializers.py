@@ -44,25 +44,19 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'user_name', 'user_phone', 'user_gender', 'password', 'password2', 
-                  'ringtone_language', 'state', 'city', 'is_all', 'user_dob')
+        fields = ('email', 'user_name', 'user_phone', 'user_gender', 'password', 'password2', 'ringtone_language', 'state', 'city', 'is_all', 'user_dob')
 
     def validate(self, attrs):
-        # Check if the passwords match
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
 
-        # Ensure phone number contains only digits
         if not attrs['user_phone'].isdigit():
             raise serializers.ValidationError({"user_phone": "Phone number must contain only digits."})
-
         return attrs
 
     def create(self, validated_data):
-        # Remove password2 from validated_data
         validated_data.pop('password2')
         
-        # Create the user and set additional fields
         user = User.objects.create(
             email=validated_data['email'],
             user_name=validated_data['user_name'],
@@ -86,15 +80,37 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RingtoneSerializer(serializers.ModelSerializer):
+    ringtone_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = models.Ringtone
-        fields = ('id', 'ringtone_title', 'ringtone_language', 'ringtone_year', 'ringtone_file', 'ringtone_url', 'audio_type', 'is_hyped', 'state', 'city', 'created_at', 'updated_at')
+        fields = (
+            'id', 'ringtone_title', 'ringtone_language', 'ringtone_year_start', 'ringtone_year_end',
+            'ringtone_url', 'audio_type', 'is_hyped', 'state', 'city', 'created_at', 'updated_at'
+        )
+
+    def get_ringtone_url(self, obj):
+        if obj.ringtone_file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.ringtone_file.url)
+            return obj.ringtone_file.url
+        return None
 
 
 class RingtoneLanguageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = models.Ringtone_Language
-        fields = ['id', 'language_name', 'status']
+        fields = ['id', 'language_name', 'status', 'image_url']
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                full_url = request.build_absolute_uri(obj.image.url)
+                return full_url
+            return obj.image.url
+        return None
 
 
 class StateSerializer(serializers.ModelSerializer):

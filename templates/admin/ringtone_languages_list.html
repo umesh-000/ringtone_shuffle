@@ -33,6 +33,7 @@
               <thead>
                 <tr>
                   <th class="text-center">ID</th>
+                  <th class="text-center">Image</th>
                   <th class="text-center">Language</th>
                   <th class="text-center">Status</th>
                   <th class="text-center">Action</th>
@@ -42,6 +43,14 @@
                 {% for language in ringtone_languages %}
                 <tr>
                   <td class="text-center pt-1 pb-1">{{ language.id }}</td>
+                  <td class="text-center pt-1 pb-1">
+                    {% if language.image %}
+                        <img src="{{ language.image.url }}" alt="Language Image" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'assets/images/logos/music14white.png' %}" alt="Default Image" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% endif %}
+                </td>
+
                   <td class="text-center pt-1 pb-1">{{ language.language_name }}</td>
                   <td class="text-center pt-1 pb-1">
                     <label class="switch">

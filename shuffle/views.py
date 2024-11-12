@@ -42,7 +42,7 @@ def login_view(request):
                     request.session.set_expiry(86400)  # 1 day in seconds
                 else:
                     request.session.set_expiry(0)  # Session expires when the browser closes
-
+                messages.success(request, "Login Successfully!")
                 return redirect('admin_dashboard')
             elif user.status == 0 and user.is_superuser:
                 messages.error(request, "Your account is inactive. Please contact the admin.")
@@ -125,23 +125,43 @@ def ringtone_lan_create(request):
     return render(request, 'admin/ringtone_languages_create.html',context)
 
 @login_required
+def ringtone_lan_create(request):
+    if request.method == 'POST':
+        lan_name = request.POST.get('lan_name')
+        img = request.FILES.get('language_img')
+        if lan_name and img:
+            if models.Ringtone_Language.objects.filter(language_name=lan_name).exists():
+                messages.error(request, 'This language already exists.')
+            else:
+                models.Ringtone_Language.objects.create( language_name=lan_name, image=img )
+                messages.success(request, 'Language created successfully!')
+                return redirect('ringtone_lan_list')
+        else:
+            messages.error(request, 'Please fill in all required fields and upload an image.')
+    context = { 'current_user': request.user }
+    return render(request, 'admin/ringtone_languages_create.html', context)
+
+@login_required
 def ringtone_lan_edit(request, id):
     ringtone_language = get_object_or_404(models.Ringtone_Language, id=id)
-    
     if request.method == 'POST':
         language_name = request.POST.get('language_name')
         status = request.POST.get('status')
-
+        image = request.FILES.get('language_img')
         ringtone_language.language_name = language_name
         ringtone_language.status = status
+        if image:
+            ringtone_language.image = image
         ringtone_language.save()
+        messages.success(request, 'Language updated successfully!')
         return redirect('ringtone_lan_list')
-    
     context = {
         'current_user': request.user,
         'ringtone_language': ringtone_language,
     }
     return render(request, 'admin/ringtone_languages_edit.html', context)
+
+
 
 @login_required
 def ringtone_lan_delete(request, id):

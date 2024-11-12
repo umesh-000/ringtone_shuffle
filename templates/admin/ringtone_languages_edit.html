@@ -24,6 +24,17 @@
                             <input type="text" class="form-control" id="category_name" name="language_name"
                                    placeholder="Enter Category Name" value="{{ ringtone_language.language_name }}" required>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="profile_img" class="form-label">Language Image</label>
+                            <div class="mb-3">
+                                <img id="logo-preview" src="{% if ringtone_language.image %}{{ ringtone_language.image.url }}{% else %}{% static 'assets/images/logos/music14white.png' %}{% endif %}" 
+                                     alt="Image Preview" style="width: 100px; height: 100px; margin-top: 10px; border-radius:50%;" />
+                            </div>
+                            <input type="file" class="form-control" id="language_img" name="language_img" accept="image/*" onchange="previewImage(event)">
+                            <div class="invalid-feedback" id="imageError"></div>
+                        </div>
+
                         
                         <div class="mb-3">
                             <label for="status" class="form-label">Status</label>
@@ -42,4 +53,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        const imageError = document.getElementById("imageError");
+        const logoPreview = document.getElementById("logo-preview");
+
+        imageError.innerText = ""; // Reset error message
+
+        if (file) {
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+            if (!validImageTypes.includes(file.type)) {
+                imageError.innerText = "Please upload a valid image (JPEG, PNG, GIF, JPG).";
+                event.target.value = ""; // Reset the file input
+                return;
+            }
+
+            // If valid, show the image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
 {% endblock %}

@@ -23,14 +23,52 @@
                             <label for="category_name" class="form-label">Language Name</label>
                             <input type="text" class="form-control" id="category_name" name="lan_name" placeholder="Enter Language Name" required>
                         </div>
-                        
+
+                        <!-- Profile Image field -->
+                        <div class="mb-3">
+                            <label for="profile_img" class="form-label">Language Image</label>
+                            <div class="mb-3">
+                                <img id="logo-preview" src="#" alt="Image Preview" style="display:none; width: 100px; height: 100px; margin-top: 10px; border-radius:50%;" />
+                            </div>
+                            <input type="file" class="form-control" id="language_img" name="language_img" accept="image/*" onchange="previewImage(event)">
+                            <div class="invalid-feedback" id="imageError"></div>
+                        </div>
+
                         <button type="submit" class="btn btn-warning">Submit</button>
                         <a href="{% url 'ringtone_lan_list' %}" class="btn bg-secondary-subtle text-secondary ms-6">Cancel</a>
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0]; // Get the selected file
+        const imageError = document.getElementById("imageError");
+        const logoPreview = document.getElementById("logo-preview");
+
+        imageError.innerText = ""; // Reset error message
+        logoPreview.style.display = "none"; // Hide image preview initially
+
+        if (file) {
+            // Check if the file is an image
+            const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+            if (!validImageTypes.includes(file.type)) {
+                imageError.innerText = "Please upload a valid image (JPEG, PNG, GIF, JPG).";
+                event.target.value = ""; // Reset the file input
+                return; // Exit the function if the file is not a valid image
+            }
+
+            // If valid, show the image preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoPreview.src = e.target.result;
+                logoPreview.style.display = "block";
+            };
+            reader.readAsDataURL(file); // Read the selected file
+        }
+    }
+</script>
 {% endblock %}
